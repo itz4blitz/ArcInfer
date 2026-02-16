@@ -1,0 +1,9 @@
+[package]
+name = "arcinfer-core"
+version = "0.1.0"
+edition = "2021"
+description = "Fixed-point arithmetic, quantization, and PCA for MPC-compatible ML inference"
+
+# Zero external dependencies — pure Rust math that mirrors what runs inside the Arcis circuit.
+# This is intentional: everything here must be reproducible in MPC (no floats, no heap allocs).
+[dependencies]
