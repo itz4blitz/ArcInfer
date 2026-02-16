@@ -1,0 +1,9 @@
+[package]
+name = "encrypted-ixs"
+version = "0.1.0"
+edition = "2021"
+description = "Arcis MPC circuit for encrypted sentiment classification"
+
+[dependencies]
+arcis = "0.8.0"
+blake3 = "=1.8.2"
