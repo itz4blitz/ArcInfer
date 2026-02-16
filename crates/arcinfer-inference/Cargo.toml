@@ -1,0 +1,10 @@
+[package]
+name = "arcinfer-inference"
+version = "0.1.0"
+edition = "2021"
+description = "Tokenization and ONNX embedding extraction for off-chain inference pipeline"
+
+[dependencies]
+arcinfer-core = { path = "../arcinfer-core" }
+tract-onnx = "0.22"
+tokenizers = "0.22"
