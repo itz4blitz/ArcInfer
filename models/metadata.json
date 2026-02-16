@@ -1,0 +1,11 @@
+{
+  "architecture": "16\u219216\u21928\u21922",
+  "activation": "square (x\u00b2)",
+  "pca_explained_variance": 0.27514589944604395,
+  "best_val_accuracy": 0.7786697149276733,
+  "total_parameters": 426,
+  "train_samples": 67349,
+  "val_samples": 872,
+  "epochs": 20,
+  "seed": 42
+}
