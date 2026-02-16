@@ -1,0 +1,49 @@
+# Build outputs
+/target
+build/
+dist/
+*.so
+
+# Dependencies
+node_modules/
+
+# Arcium / Solana
+.anchor/
+test-ledger/
+artifacts/
+
+# Environment
+.env
+.env.*
+
+# Large model binaries (served locally, not source)
+models/*.onnx
+app/public/models/
+app/public/onnx/
+
+# Next.js
+app/.next/
+
+# Coverage
+coverage/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+*.pid
+
+# Generated / ephemeral
+app/tsconfig.tsbuildinfo
+app/next-env.d.ts
+app/package-lock.json
+
+# Internal project notes (not for public)
+ARCINFER_PROJECT_PROMPT.md
