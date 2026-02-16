@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+
+:root {
+  --background: #0a0a0b;
+  --foreground: #ededef;
+  --card: #101012;
+  --card-foreground: #ededef;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.1);
+  --muted: #141416;
+  --muted-foreground: #8b8b8e;
+  --accent: #06b6d4;
+  --accent-hover: #0891b2;
+  --accent-glow: rgba(6, 182, 212, 0.12);
+  --positive: #4ade80;
+  --negative: #f87171;
+  --surface: #18181b;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle radial gradient behind the main content */
+.bg-glow {
+  background:
+    radial-gradient(ellipse 600px 400px at 50% 0%, var(--accent-glow), transparent),
+    var(--background);
+}
+
+/* Wallet adapter overrides to match aesthetic */
+.wallet-adapter-button {
+  background: var(--accent) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  transition: all 0.15s ease !important;
+}
+
+.wallet-adapter-button:hover {
+  background: var(--accent-hover) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+}
+
+.wallet-adapter-modal-title {
+  color: var(--foreground) !important;
+  font-weight: 500 !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 3px;
+}
+
+/* Pulse animation for active stages */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(6, 182, 212, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
