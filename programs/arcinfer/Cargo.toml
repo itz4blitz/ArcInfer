@@ -1,0 +1,26 @@
+[package]
+name = "arcinfer"
+version = "0.1.0"
+edition = "2021"
+description = "Solana/Anchor program for ArcInfer encrypted sentiment analysis"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+anchor-debug = []
+custom-heap = []
+custom-panic = []
+skip-lint = []
+idl-build = ["anchor-lang/idl-build", "arcium-anchor/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
+arcium-client = { version = "0.8.3", default-features = false }
+arcium-macros = "0.8.3"
+arcium-anchor = "0.8.3"
