@@ -6,7 +6,7 @@ ArcInfer classifies text as positive or negative without ever exposing the input
 
 ## How It Works
 
-```
+```text
 Text → Tokenize → ONNX Embed (384d) → PCA (16d) → Quantize (Q16.16) → Encrypt → MPC Classify → Result
        ──────── browser ──────────────────────────────────────────────   ─ solana ─   ─ arcium ─
 ```
@@ -20,7 +20,7 @@ Text → Tokenize → ONNX Embed (384d) → PCA (16d) → Quantize (Q16.16) → 
 
 ## Architecture
 
-```
+```text
 crates/
   arcinfer-core/         Zero-dep Rust library: fixed-point math, NN layers, classifier
   arcinfer-inference/    Client-side pipeline: tokenizer, ONNX embedding, PCA, quantization
@@ -39,7 +39,7 @@ training/                Python training pipeline (PyTorch → ONNX → PCA → 
 ### Neural Network
 
 | Property | Value |
-|----------|-------|
+| --- | --- |
 | Architecture | 16 → 16 → 8 → 2 (fully connected) |
 | Activation | x² (MPC-friendly, no comparisons needed) |
 | Parameters | 426 |
@@ -65,10 +65,17 @@ cargo test --workspace --exclude arcinfer --exclude arcis-arcinfer
 
 ### Solana program + MPC circuits
 
+Circuits are stored offchain on IPFS. Set their URLs before building:
+
 ```bash
+export CLASSIFY_CIRCUIT_URL="<your-ipfs-gateway>/bafybeigjlp3cywmyd6xufivziaeedzfvlig6u2z6m4afsslaphmbblenzi"
+export CLASSIFY_REVEAL_CIRCUIT_URL="<your-ipfs-gateway>/bafybeidgrpe3wvpr3b3p46ipc4nmsjguwq3afe47o5nxqvvcxwqe23bwuu"
+
 arcium build
 arcium test
 ```
+
+Any IPFS gateway works (e.g. `https://ipfs.io/ipfs/`, `https://dweb.link/ipfs/`, or a Pinata dedicated gateway).
 
 ### Frontend
 
@@ -78,12 +85,25 @@ yarn install
 yarn dev
 ```
 
-The frontend expects model files in `app/public/models/` and ONNX runtime WASM binaries in `app/public/onnx/`. These are large binaries not tracked in git — download them from the [all-MiniLM-L6-v2](https://huggingface.co/Xenova/all-MiniLM-L6-v2) model page and the [ONNX Runtime releases](https://github.com/nicktehrany/onnxruntime-web-bundler).
+The frontend needs model files and ONNX Runtime WASM binaries (not tracked in git):
+
+```bash
+# ONNX model for in-browser embedding
+mkdir -p app/public/models
+curl -L -o app/public/models/model.onnx \
+  "https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx"
+
+# ONNX Runtime WASM binaries
+mkdir -p app/public/onnx
+cd app/public/onnx
+curl -LO "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort-wasm-simd-threaded.jsep.wasm"
+curl -LO "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort-wasm-simd.jsep.wasm"
+```
 
 ## Devnet
 
 | Resource | Value |
-|----------|-------|
+| --- | --- |
 | Program ID | `2UEesrBiknFE3BoAh5BtZwbr5y2AFvWe2wksVi3MqeX9` |
 | Network | Solana Devnet |
 | Circuits | Hosted on IPFS, fetched by Arcium nodes at runtime |

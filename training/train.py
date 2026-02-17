@@ -6,8 +6,8 @@ Trains the sentiment classifier for encrypted inference on Arcium.
 Steps:
   1. Load SST-2 dataset (Stanford Sentiment Treebank)
   2. Generate 384-dim embeddings using all-MiniLM-L6-v2
-  3. Fit PCA (384→64) on training embeddings
-  4. Train a 64→32→16→2 classifier with square activations
+  3. Fit PCA (384→16) on training embeddings
+  4. Train a 16→16→8→2 classifier with square activations
   5. Export weights + PCA matrix as JSON for Rust
 
 Every step includes assertions that verify correctness.
@@ -96,7 +96,7 @@ assert np.abs(train_embeddings).max() < 10.0, \
 
 
 # ============================================================================
-# Step 3: Fit PCA (384 → 64)
+# Step 3: Fit PCA (384 → 16)
 # ============================================================================
 
 print(f"\nStep 3: Fitting PCA ({EMBED_DIM} → {PCA_DIM})...")
@@ -285,15 +285,15 @@ print(f"  Saved classifier weights to {weights_path}")
 # VERIFY: Weight JSON roundtrips correctly
 with open(weights_path) as f:
     w_check = json.load(f)
-# Layer 1: 64→32
+# Layer 1: 16→16
 assert len(w_check["net.0.weight"]) == HIDDEN1
 assert len(w_check["net.0.weight"][0]) == PCA_DIM
 assert len(w_check["net.0.bias"]) == HIDDEN1
-# Layer 2: 32→16
+# Layer 2: 16→8
 assert len(w_check["net.2.weight"]) == HIDDEN2
 assert len(w_check["net.2.weight"][0]) == HIDDEN1
 assert len(w_check["net.2.bias"]) == HIDDEN2
-# Layer 3: 16→2
+# Layer 3: 8→2
 assert len(w_check["net.4.weight"]) == NUM_CLASSES
 assert len(w_check["net.4.weight"][0]) == HIDDEN2
 assert len(w_check["net.4.bias"]) == NUM_CLASSES

@@ -11,6 +11,10 @@ node_modules/
 .anchor/
 test-ledger/
 artifacts/
+vendor/
+
+# Internal docs (kept locally, not in repo)
+docs/
 
 # Environment
 .env
