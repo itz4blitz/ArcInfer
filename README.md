@@ -4,20 +4,28 @@ Private sentiment classification powered by multi-party computation on Solana.
 
 ArcInfer classifies text as positive or negative without ever exposing the input. The entire inference pipeline — from embedding to classification — runs on encrypted data using [Arcium](https://arcium.com)'s MPC network.
 
+## Demo
+
+<!-- TODO: drag ArcInfer.mp4 into the GitHub editor to upload, then paste the video URL below -->
+<!-- https://github.com/user-attachments/assets/REPLACE_ME -->
+
 ## How It Works
 
 ```mermaid
 flowchart LR
   subgraph Browser
-    A[Text] --> B[Tokenize] --> C[ONNX Embed\n384-d] --> D[PCA\n16-d] --> E[Quantize\nQ16.16] --> F[Encrypt\nx25519 + Rescue]
+    A[Text] --> B[Embed 384d] --> C[PCA 16d] --> D[Quantize Q16.16] --> E[Encrypt x25519]
   end
+
   subgraph Solana
-    F --> G[Submit tx\n16 ciphertexts]
+    E --> F[Submit 16 ciphertexts]
   end
-  subgraph Arcium
-    G --> H[MPC nodes\nsecret-share & classify]
+
+  subgraph Arcium MPC
+    F --> G[Secret-share and classify]
   end
-  H --> I[Result\npositive / negative]
+
+  G --> H[positive / negative]
 ```
 
 1. **Browser** — Text is tokenized and embedded into a 384-dim vector using all-MiniLM-L6-v2 (ONNX/WASM), reduced to 16 dims via PCA, quantized to Q16.16 fixed-point, then encrypted with the MPC cluster's public key
