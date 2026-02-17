@@ -5,9 +5,9 @@ Private sentiment classification powered by multi-party computation on Solana.
 ArcInfer classifies text as positive or negative without ever exposing the input. The entire inference pipeline — from embedding to classification — runs on encrypted data using [Arcium](https://arcium.com)'s MPC network.
 
 ## Demo
+https://github.com/user-attachments/assets/de903c23-3315-4705-8cd3-96d9e5abd079
 
-<!-- TODO: drag ArcInfer.mp4 into the GitHub editor to upload, then paste the video URL below -->
-<!-- https://github.com/user-attachments/assets/REPLACE_ME -->
+
 
 ## How It Works
 
