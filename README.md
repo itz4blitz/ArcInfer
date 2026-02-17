@@ -6,17 +6,24 @@ ArcInfer classifies text as positive or negative without ever exposing the input
 
 ## How It Works
 
-```text
-Text → Tokenize → ONNX Embed (384d) → PCA (16d) → Quantize (Q16.16) → Encrypt → MPC Classify → Result
-       ──────── browser ──────────────────────────────────────────────   ─ solana ─   ─ arcium ─
+```mermaid
+flowchart LR
+  subgraph Browser
+    A[Text] --> B[Tokenize] --> C[ONNX Embed\n384-d] --> D[PCA\n16-d] --> E[Quantize\nQ16.16] --> F[Encrypt\nx25519 + Rescue]
+  end
+  subgraph Solana
+    F --> G[Submit tx\n16 ciphertexts]
+  end
+  subgraph Arcium
+    G --> H[MPC nodes\nsecret-share & classify]
+  end
+  H --> I[Result\npositive / negative]
 ```
 
-1. **Browser** — Text is tokenized and embedded into a 384-dimensional vector using all-MiniLM-L6-v2 (runs entirely in-browser via ONNX/WASM)
-2. **Browser** — PCA reduces to 16 dimensions, then values are quantized to Q16.16 fixed-point
-3. **Browser** — Each value is encrypted with x25519 + RescueCipher using the MPC cluster's public key
-4. **Solana** — A transaction carries the 16 ciphertexts on-chain and queues MPC computation
-5. **Arcium** — MPC nodes secret-share the data and evaluate a neural network collaboratively — no single node ever sees the input
-6. **Solana** — The classification result (positive / negative) is emitted via a callback transaction event
+1. **Browser** — Text is tokenized and embedded into a 384-dim vector using all-MiniLM-L6-v2 (ONNX/WASM), reduced to 16 dims via PCA, quantized to Q16.16 fixed-point, then encrypted with the MPC cluster's public key
+2. **Solana** — A transaction carries the 16 ciphertexts on-chain and queues MPC computation
+3. **Arcium** — MPC nodes secret-share the data and evaluate a neural network collaboratively — no single node ever sees the input
+4. **Solana** — The classification result (positive / negative) is emitted via a callback event
 
 ## Architecture
 
