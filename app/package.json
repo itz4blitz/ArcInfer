@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "oxlint src/",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint"
+    "check": "npm run typecheck && npm run lint",
+    "build:static": "STATIC_EXPORT=true next build && rm -rf out/models && find out/onnx -type f ! -name 'ort-wasm-simd-threaded.jsep.wasm' -delete",
+    "deploy": "npm run build:static && npx wrangler pages deploy out --project-name arcinfer"
   },
   "dependencies": {
     "@arcium-hq/client": "^0.8.3",

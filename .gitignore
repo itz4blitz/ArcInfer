@@ -27,6 +27,7 @@ app/public/onnx/
 
 # Next.js
 app/.next/
+app/out/
 
 # Coverage
 coverage/

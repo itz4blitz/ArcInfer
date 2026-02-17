@@ -1,14 +1,19 @@
 import type { NextConfig } from "next";
 import { resolve } from "path";
 
+const isStaticExport = process.env.STATIC_EXPORT === "true";
+
 const nextConfig: NextConfig = {
+  // Static export for Cloudflare Pages deployment
+  ...(isStaticExport ? { output: "export" } : {}),
+
   // Transpile Arcium client SDK for browser compatibility
   transpilePackages: ["@arcium-hq/client"],
 
   // Server-side: externalize native Node modules
   serverExternalPackages: ["onnxruntime-node"],
 
-  // Turbopack (default bundler in Next.js 16)
+  // Turbopack (default bundler in Next.js 16, dev only)
   turbopack: {
     root: resolve(import.meta.dirname),
     resolveAlias: {
@@ -21,29 +26,41 @@ const nextConfig: NextConfig = {
     },
   },
 
-  async headers() {
-    // Required for SharedArrayBuffer, which onnxruntime-web's threaded WASM backend uses.
-    // Without cross-origin isolation, model initialization can hang or fail in the browser.
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
-        ],
-      },
-      // Prevent HTTP cache confusion for large binary assets during dev.
-      // (Transformers.js caching is handled separately via CacheStorage settings in code.)
-      {
-        source: "/models/:path*",
-        headers: [{ key: "Cache-Control", value: "no-store" }],
-      },
-      {
-        source: "/onnx/:path*",
-        headers: [{ key: "Cache-Control", value: "no-store" }],
-      },
-    ];
+  // Webpack aliases (production build uses webpack, not turbopack)
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      fs: resolve(import.meta.dirname, "src/lib/shims/fs.ts"),
+      crypto: resolve(import.meta.dirname, "src/lib/shims/crypto.ts"),
+      "onnxruntime-node": resolve(import.meta.dirname, "src/lib/shims/fs.ts"),
+    };
+    return config;
   },
+
+  // headers() is used by the dev server; static export uses _headers file instead.
+  ...(!isStaticExport
+    ? {
+        async headers() {
+          return [
+            {
+              source: "/:path*",
+              headers: [
+                { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+                { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+              ],
+            },
+            {
+              source: "/models/:path*",
+              headers: [{ key: "Cache-Control", value: "no-store" }],
+            },
+            {
+              source: "/onnx/:path*",
+              headers: [{ key: "Cache-Control", value: "no-store" }],
+            },
+          ];
+        },
+      }
+    : {}),
 };
 
 export default nextConfig;

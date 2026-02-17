@@ -1,8 +1,8 @@
 /**
  * Browser-side sentence embedding using @huggingface/transformers.
  *
- * Loads all-MiniLM-L6-v2 from local /models/ assets (no CDN dependency).
- * ONNX runtime WASM loaded from local /onnx/ (no jsdelivr dependency).
+ * Dev: loads all-MiniLM-L6-v2 from local /models/ assets (no CDN dependency).
+ * Prod: fetches from HuggingFace Hub CDN and caches in browser.
  * Returns a 384-dimensional sentence embedding.
  */
 
@@ -66,11 +66,22 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
 function configureTransformersEnv(env: TransformersEnvironment) {
-  // Local-only: serve model from /public/models/, never fetch from HuggingFace CDN.
-  env.allowLocalModels = true;
-  env.allowRemoteModels = false;
-  env.localModelPath = "/models/";
+  if (IS_PRODUCTION) {
+    // Production: fetch model from HuggingFace Hub CDN, cache in browser.
+    env.allowLocalModels = false;
+    env.allowRemoteModels = true;
+    env.useBrowserCache = true;
+  } else {
+    // Dev: serve from /public/models/, no CDN dependency.
+    env.allowLocalModels = true;
+    env.allowRemoteModels = false;
+    env.localModelPath = "/models/";
+    env.useBrowserCache = false;
+    env.useCustomCache = false;
+  }
 
   // Turbopack aliases `fs` to a shim that exports real functions (existsSync, etc.).
   // This makes Transformers.js detect IS_FS_AVAILABLE=true, which causes getFile()
@@ -78,10 +89,6 @@ function configureTransformersEnv(env: TransformersEnvironment) {
   // returns false, so every file silently 404s. Force the HTTP fetch path instead.
   env.useFS = false;
   env.useFSCache = false;
-
-  // No persistent or custom cache during dev — prevents stale/corrupt cache issues.
-  env.useBrowserCache = false;
-  env.useCustomCache = false;
 }
 
 // The default ORT entry point (ort.bundle.min.mjs) is the JSEP build.
@@ -115,7 +122,7 @@ function configureOnnxBackend(env: TransformersEnvironment) {
 }
 
 async function preflightLocalAssets(): Promise<void> {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || IS_PRODUCTION) return;
 
   const urls = [
     "/models/Xenova/all-MiniLM-L6-v2/config.json",
@@ -151,8 +158,10 @@ export async function initEmbedding(
     try {
       onProgress?.({ status: "loading", progress: 0, message: "Preparing model loader..." });
 
-      onProgress?.({ status: "loading", progress: 2, message: "Checking local model assets..." });
-      await preflightLocalAssets();
+      if (!IS_PRODUCTION) {
+        onProgress?.({ status: "loading", progress: 2, message: "Checking local model assets..." });
+        await preflightLocalAssets();
+      }
 
       onProgress?.({ status: "loading", progress: 5, message: "Loading Transformers.js runtime..." });
       const { pipeline, env } = await withTimeout(
@@ -169,7 +178,7 @@ export async function initEmbedding(
       const initTask = withTimeout(
         pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", {
           device: "wasm",
-          local_files_only: true,
+          local_files_only: !IS_PRODUCTION,
           dtype: "q8",
           subfolder: "onnx",
           progress_callback: (info: ProgressInfo) => {
